@@ -54,6 +54,11 @@ def evaluate_img_patch(model, img):
     for y in range(0, img_height - input_height + 1, stride):
         for x in range(0, img_width - input_width + 1, stride):
             segment = img[y:y + input_height, x:x + input_width]
+            # print(y,y+input_height,x,x+input_width)
+            # print(img[y:y + input_height, x:x + input_width])
+            # img = cv2.rectangle(img,(y,y+input_height),(x,x+input_width),(255,0,0),3)
+           
+            
             normalization_map[y:y + input_height, x:x + input_width] += 1
             patches.append(segment)
             patch_locs.append((x, y))
@@ -74,7 +79,7 @@ def evaluate_img_patch(model, img):
     for i, response in enumerate(preds):
         coords = patch_locs[i]
         probability_map[coords[1]:coords[1] + input_height, coords[0]:coords[0] + input_width] += response
-
+    
     return probability_map
 
 def disable_axis():
@@ -118,7 +123,13 @@ if __name__ == '__main__':
     channel_means = [0.485, 0.456, 0.406]
     channel_stds  = [0.229, 0.224, 0.225]
 
-    paths = [path for path in Path("./crack_image").glob('*.*')]
+    # 사진 불러오는 공간 설정
+
+    # paths = [path for path in Path("./crack_image").glob('*.*')]
+    paths = [path for path in Path("./img").glob('*.*')]
+
+
+
     for path in tqdm(paths):
         #print(str(path))
 
@@ -135,6 +146,7 @@ if __name__ == '__main__':
         img_height, img_width, img_channels = img_0.shape
 
         prob_map_full = evaluate_img(model, img_0)
+
 
         if Path("./result") != '':
             cv.imwrite(filename=join(Path("./result"), f'{path.stem}.jpg'), img=(prob_map_full * 255).astype(np.uint8))
@@ -160,7 +172,7 @@ if __name__ == '__main__':
 
             
 
-            # cv.imwrite(filename=join(Path("./crack_edge"), "mask_opencv "+f'{path.stem}.jpg'), img=(prob_map_viz_patch * 255).astype(np.uint8))
+            cv.imwrite(filename=join(Path("./crack_edge"), "mask_opencv "+f'{path.stem}.jpg'), img=(prob_map_viz_patch * 255).astype(np.uint8))
 
             # model1.predict("crack_edge/mask_opencv "+f'{path.stem}.jpg', confidence=40, overlap=30).save("prediction"+f'{path.stem}.jpg')
 
@@ -176,18 +188,64 @@ if __name__ == '__main__':
             ax = fig.add_subplot(133)
             ax.imshow(img_1)
             # ax.imshow(img)
+
+            # img3=cv2.imread(join(Path("./crack_edge"), "mask_opencv "+f'{path.stem}.jpg'),cv2.IMREAD_GRAYSCALE)
+            # blurred=cv2.GaussianBlur(img3,(0,0),1)
+
+            # th1=100
+            # th2=200
+            # no_blur=cv2.Canny(img3,th1,th2)
+            # yes_blur=cv2.Canny(blurred,th1,th2)
+
+            # cv2.imshow("canny_img", yes_blur)
+            # cv2.waitKey(0)
+
             ax.imshow(prob_map_viz_patch, alpha=0.4)
+            # ax.imshow(yes_blur, alpha=0.4)
 
             plt.savefig(join(Path("./viz"), f'{path.stem}.jpg'), dpi=500)
             plt.close('all')
 
+            # cv2.namedWindow("edgeadd")
+            # cv2.imshow("edgeadd",img_1)
+            # dst1 = cv2.add(img_1, prob_map_viz_patch, dtype=cv2.CV_8U)
+            # cv2.imshow("edgeadd",prob_map_viz_patch, alpha = 0.4)
+            # cv2.imshow("edgeadd",dst1)
+            # cv2.waitKey(0)
+
+
+            
             fig1 = plt.figure()
-            ax1 = fig1.add_subplot(111)
-            ax1.imshow(prob_map_viz_patch)
+            ax1 = fig1.add_subplot()
+            ax1.axis('off')
+            ax1.imshow(img_1)
+            ax1.imshow(prob_map_viz_patch, alpha=0.4)
+
+            # cv2.imshow("",prob_map_viz_patch)
+
+            # np.set_printoptions(threshold=np.inf, linewidth=np.inf)
+            # print(prob_map_viz_patch)
             
             
-            plt.savefig(join(Path("./crack_edge"), 'mask' + f'{path.stem}.jpg'), dpi=500)
+            plt.savefig(join(Path("./crack_edge"), 'mask' + f'{path.stem}.jpg'), dpi=500, bbox_inches='tight', pad_inches=0)
             plt.close('all')
+
+        
+
+            # image = cv2.imread("./crack_edge/mask_opencv"+f'{path.stem}.jpg', cv2.IMREAD_GRAYSCALE)
+
+            # def onChange():
+            #     pass    
+
+            # cv2.namedWindow("result")
+            # a = cv2.getTrackbarPos('A', 'result')
+            # cv2.createTrackbar('A', 'result', 0, 255, a)
+
+            # cv2.createTrackbar('B', 'result', 0, 255, onChange)
+            # b = cv2.getTrackbarPos('B', 'result')
+
+
+            
 
             # cv2.imshow('',prob_map_viz_patch)
             # cv2.waitKey(0)
