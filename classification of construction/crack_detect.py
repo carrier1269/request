@@ -126,7 +126,7 @@ if __name__ == '__main__':
     # 사진 불러오는 공간 설정
 
     # paths = [path for path in Path("./crack_image").glob('*.*')]
-    paths = [path for path in Path("./img").glob('*.*')]
+    paths = [path for path in Path("./crack_image").glob('*.*')]
 
 
 
